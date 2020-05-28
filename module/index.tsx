@@ -1,4 +1,4 @@
-import React, {Context, useContext, useMemo} from 'react';
+import React, {Context, useContext, useMemo, useCallback} from 'react';
 
 /**
  * Declare types
@@ -82,7 +82,7 @@ export function useTheme(): string {
  * Hook returns the colors for current theme
  */
 export function useThemeColors(): Theme {
-    const theme: string = useContext(ThemeContext);
+    const theme = useContext(ThemeContext);
     return useMemo(() => getColorTheme(theme), [theme]);
 }
 
@@ -92,4 +92,14 @@ export function useThemeColors(): Theme {
 export function useThemeStyles(styleCreator: StyleCreator, props?: any): any {
     const theme = useContext(ThemeContext);
     return useMemo(() => styleCreator(getColorTheme(theme), props), [theme, styleCreator, props]);
+}
+
+/**
+ * Hook returns style creator
+ */
+export function useStyleCreator() {
+    const theme = useContext(ThemeContext);
+    return useCallback((styleCreator, props) => (
+        styleCreator(getColorTheme(theme), props)
+    ), [theme]);
 }
