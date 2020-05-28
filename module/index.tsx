@@ -99,7 +99,7 @@ export function useThemeStyles(styleCreator: StyleCreator, props?: any): any {
  */
 export function useStyleCreator() {
     const theme = useContext(ThemeContext);
-    return useCallback((styleCreator, props) => (
+    return useCallback((styleCreator: StyleCreator, props?: any): any => (
         styleCreator(getColorTheme(theme), props)
     ), [theme]);
 }
