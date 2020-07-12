@@ -1,18 +1,35 @@
 import React, {useState} from 'react';
+import {Button, SafeAreaView, StatusBar, StyleSheet, Text} from 'react-native';
 import {
-    SafeAreaView,
-    StyleSheet,
-    StatusBar,
-    Text, Button,
-} from 'react-native';
-import {setColorThemes, ThemeProvider, useThemeStyles} from '../module';
+    Colors,
+    CreateColorThemesType,
+    setColorThemes,
+    ThemeProvider,
+    useTheme,
+    useThemeColors,
+    useThemeStyles,
+} from '../module';
 
-setColorThemes({
-    red: {
+type ThemeKeys = 'light' | 'dark';
+type ColorKeys = 'textColor';
+type Themes = CreateColorThemesType<ThemeKeys, ColorKeys>;
+
+setColorThemes<Themes>({
+    light: {
         textColor: 'red',
     },
-    green: {
+    dark: {
         textColor: 'green',
+    },
+});
+
+const styleCreator = (colors: Colors<Themes>) => StyleSheet.create({
+    text: {
+        color: colors.textColor,
+    },
+    background: {
+        textAlign: 'auto',
+        color: colors.textColor,
     },
 });
 
@@ -37,15 +54,15 @@ const App = () => {
 };
 
 const ThemeText = () => {
+    const theme = useTheme<Themes>();
+    const colors = useThemeColors<Themes>();
     const styles = useThemeStyles(styleCreator);
+
+    console.log(theme);
+    console.log(colors.textColor);
+    console.log(styles.text);
+
     return <Text style={styles.text}>Hello</Text>;
 };
-
-
-const styleCreator = (colors: { [key: string]: string }) => StyleSheet.create({
-    text: {
-        color: colors.textColor,
-    },
-});
 
 export default App;
