@@ -28,10 +28,12 @@ export function configureThemes<T extends ThemesType<T>>(themesConfiguration: T,
 }
 
 export function setTheme<T extends ThemesType<T>>(theme: keyof T): void {
-  _currentTheme = theme;
-  _listeners.forEach(listener => {
-    listener(theme);
-  });
+  if (_currentTheme !== theme) {
+    _currentTheme = theme;
+    _listeners.forEach(listener => {
+      listener(theme);
+    });
+  }
 }
 
 export function useStyle<T extends ThemesType<T>, S extends NamedStyles<S>>(creator: StyleCreatorWithoutProps<T, S>): S;
