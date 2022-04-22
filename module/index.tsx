@@ -1,106 +1,101 @@
-import React, {Context, useContext, useMemo} from 'react';
-import {ImageStyle, TextStyle, ViewStyle} from 'react-native';
+import { useEffect, useMemo, useState } from 'react';
 
-/**
- * Declare types
- */
-export type CreateColorThemesType<TK extends string, CK extends string> = {
-    [key in TK]: {
-        [key in CK]: string
-    }
-}
+import {
+  NamedStyles,
+  StyleCreator,
+  StyleCreatorWithoutProps,
+  StyleCreatorWithProps,
+  ThemeListener,
+  ThemesType,
+} from './types';
 
-export type NamedStyles<T> = { [P in keyof T]: ViewStyle | TextStyle | ImageStyle };
+const _listeners = new Map();
 
-export type Colors<T> = T[keyof T]
+let _themes: ThemesType<any>;
 
-export type ColorThemes<T> = { [K in keyof T]: Colors<T> }
+let _currentTheme: any;
 
-export type StyleCreatorWithoutProps<T extends ColorThemes<T>, S extends NamedStyles<S>> = (colors: Colors<T>) => S
-export type StyleCreatorWithProps<T extends ColorThemes<T>, S extends NamedStyles<S>, P> = (colors: Colors<T>, props: P) => S
-export type StyleCreator<T extends ColorThemes<T>, S extends NamedStyles<S>, P = never> = (colors: Colors<T>, props?: P) => S
+export const addListener = <T extends ThemesType<T>>(listener: ThemeListener<T>): (() => boolean) => {
+  const key = Symbol();
+  _listeners.set(key, listener);
 
-type ThemeProviderProps = {
-    value: string,
-    children: React.ReactNode,
-}
-
-/**
- * Declare variables
- */
-let colors = {};
-let ThemeContext: Context<any>;
-
-/**
- * Set color themes
- */
-export function setColorThemes<T extends ColorThemes<T>>(themes: T): void {
-    colors = themes;
-}
-
-/**
- * Return colors by theme
- */
-export function getColorTheme<T extends ColorThemes<T>>(theme: keyof T): T[keyof T] {
-    return (colors as T)[theme];
-}
-
-/**
- * Create styles
- */
-export function createStyle<T extends ColorThemes<T>, S extends NamedStyles<S>>(styleCreator: StyleCreatorWithoutProps<T, S>): S
-export function createStyle<T extends ColorThemes<T>, S extends NamedStyles<S>, P>(styleCreator: StyleCreatorWithProps<T, S, P>): S
-export function createStyle<T extends ColorThemes<T>, S extends NamedStyles<S>, P = never>(styleCreator: StyleCreator<T, S, P>) {
-    return function (theme: keyof T, props?: P) {
-        return styleCreator(getColorTheme<T>(theme), props);
-    };
-}
-
-/**
- * Theme context creator
- */
-function createContext(value: string): void {
-    ThemeContext = React.createContext(value);
-}
-
-/**
- * Theme provider component
- */
-export const ThemeProvider: React.FC<ThemeProviderProps> = ({children, value}) => {
-    if (!ThemeContext) {
-        createContext(value);
-    }
-    if (ThemeContext) {
-        return (
-            <ThemeContext.Provider value={value}>
-                {children}
-            </ThemeContext.Provider>
-        );
-    }
-    return null;
+  return () => _listeners.delete(key);
 };
 
-/**
- * Hook returns the name of current theme
- */
-export function useTheme<T extends ColorThemes<T>>(): keyof T {
-    return useContext<keyof T>(ThemeContext);
+export function configureThemes<T extends ThemesType<T>>(themesConfiguration: T, defaultTheme: keyof T) {
+  _themes = themesConfiguration;
+  _currentTheme = defaultTheme;
 }
 
-/**
- * Hook returns the colors for current theme
- */
-export function useThemeColors<T extends ColorThemes<T>>(): Colors<T> {
-    const theme = useContext<keyof T>(ThemeContext);
-    return useMemo(() => getColorTheme<T>(theme), [theme]);
+export function setTheme<T extends ThemesType<T>>(theme: keyof T): void {
+  _currentTheme = theme;
+  _listeners.forEach(listener => {
+    listener(theme);
+  });
 }
 
-/**
- * Hook returns styles
- */
-export function useThemeStyles<T extends ColorThemes<T>, S extends NamedStyles<S>>(styleCreator: StyleCreatorWithoutProps<T, S>): S
-export function useThemeStyles<T extends ColorThemes<T>, S extends NamedStyles<S>, P>(styleCreator: StyleCreatorWithProps<T, S, P>, props: P): S
-export function useThemeStyles<T extends ColorThemes<T>, S extends NamedStyles<S>, P = never>(styleCreator: StyleCreator<T, S, P>, props?: P) {
-    const theme = useContext<keyof T>(ThemeContext);
-    return useMemo(() => styleCreator(getColorTheme<T>(theme), props), [theme, styleCreator, props]);
+export function useStyle<T extends ThemesType<T>, S extends NamedStyles<S>>(creator: StyleCreatorWithoutProps<T, S>): S;
+
+export function useStyle<T extends ThemesType<T>, S extends NamedStyles<S>, P>(
+  creator: StyleCreatorWithProps<T, S, P>,
+  props: P,
+): S;
+
+export function useStyle<T extends ThemesType<T>, S extends NamedStyles<S>, P>(
+  creator: StyleCreator<T, S, P>,
+  props?: P,
+): S {
+  const [_theme, _setTheme] = useState<keyof T>(_currentTheme);
+
+  useEffect(() => {
+    const unsubscribe = addListener(value => {
+      _setTheme(value);
+    });
+
+    return () => {
+      unsubscribe();
+    };
+  }, []);
+
+  return useMemo(() => creator(_themes[_theme], props), [creator, _theme, props]);
+}
+
+export function useColors<T extends ThemesType<T>>(): T[keyof T] {
+  const [_theme, _setTheme] = useState<keyof T>(_currentTheme);
+
+  useEffect(() => {
+    const unsubscribe = addListener(value => {
+      _setTheme(value);
+    });
+
+    return () => {
+      unsubscribe();
+    };
+  }, []);
+
+  return useMemo(() => _themes[_theme], [_theme]);
+}
+
+export function useTheme<T extends ThemesType<T>>(): keyof T {
+  const [_theme, _setTheme] = useState<keyof T>(_currentTheme);
+
+  useEffect(() => {
+    const unsubscribe = addListener((value: keyof T) => {
+      _setTheme(value);
+    });
+
+    return () => {
+      unsubscribe();
+    };
+  }, []);
+
+  return useMemo(() => _theme, [_theme]);
+}
+
+export function getTheme<T extends ThemesType<T>>(): keyof T {
+  return _currentTheme;
+}
+
+export function getColors<T extends ThemesType<T>>(): T[keyof T] {
+  return _themes[_currentTheme];
 }
