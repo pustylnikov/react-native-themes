@@ -1,6 +1,6 @@
 {
   "name": "@anvilapp/react-native-themes",
-  "version": "0.4.1",
+  "version": "0.5.1",
   "description": "React native color themes",
   "main": "dist/index.js",
   "types": "dist/index.d.ts",

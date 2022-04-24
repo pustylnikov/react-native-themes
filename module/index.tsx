@@ -98,6 +98,6 @@ export function getTheme<T extends ThemesType<T>>(): keyof T {
   return _currentTheme;
 }
 
-export function getColors<T extends ThemesType<T>>(): T[keyof T] {
-  return _themes[_currentTheme];
+export function getColors<T extends ThemesType<T>>(theme?: keyof T): T[keyof T] {
+  return _themes[theme || _currentTheme];
 }
