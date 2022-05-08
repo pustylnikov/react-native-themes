@@ -1,0 +1,13 @@
+{
+  "extends": "./tsconfig.json",
+  "compilerOptions": {
+    "declaration": true,                      /* Generates corresponding '.d.ts' file. */
+    "outDir": "./dist",                       /* Redirect output structure to the directory. */
+    "rootDir": "./module",                    /* Specify the root directory of input files. Use to control the output directory structure with --outDir. */
+    "removeComments": true,                   /* Do not emit comments to output. */
+    "noEmit": false,                        /* Do not emit outputs. */
+  },
+  "include": [
+    "./module/*"
+  ]
+}
