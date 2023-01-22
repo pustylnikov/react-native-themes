@@ -1,23 +1,26 @@
-import { ImageStyle, TextStyle, ViewStyle } from 'react-native';
+import {ImageStyle, TextStyle, ViewStyle} from 'react-native';
 
-export type NamedStyles<T> = { [P in keyof T]: ViewStyle | TextStyle | ImageStyle };
+export type CreateThemesType<TK extends string, CK extends string> = { [k in TK]: { [j in CK]: string; } };
 
-export type CreateThemesType<TK extends string, CK extends string> = {
-  [i in TK]: {
-    [j in CK]: string;
-  };
+export type CreateColorsType<T extends Themes<any>> = T[keyof T];
+
+export type Themes<T> = { [K in keyof T]: Colors<T> };
+
+export type Colors<T> = T[keyof T];
+
+export type Styles<T> = { [P in keyof T]: ViewStyle | TextStyle | ImageStyle };
+
+export type Theme<T extends Themes<any>, S extends Styles<S>> = {
+  theme: keyof T;
+  colors: Colors<T>;
+  styles: S;
 };
 
-export type CreateColorsType<T extends string> = { [key in T]: string };
+export type ThemeWithoutStyles<T extends Themes<any>> = {
+  theme: keyof T;
+  colors: Colors<T>;
+};
 
-export type ThemeColors<T> = T[keyof T];
+export type ThemeListener<T extends Themes<any>> = (theme: keyof T) => void;
 
-export type ThemesType<T> = { [K in keyof T]: ThemeColors<T> };
-
-export type ThemeListener<T> = (theme: keyof T) => void;
-
-export type StyleCreatorWithoutProps<T extends ThemesType<T>, S extends NamedStyles<S>> = (colors: T) => S;
-
-export type StyleCreatorWithProps<T extends ThemesType<T>, S extends NamedStyles<S>, P> = (colors: T, props: P) => S;
-
-export type StyleCreator<T extends ThemesType<T>, S extends NamedStyles<S>, P = never> = (colors: T, props?: P) => S;
+export type StyleCreator<T extends Themes<any>, S extends Styles<S>> = (colors: Colors<T>) => S;

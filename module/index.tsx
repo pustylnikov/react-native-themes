@@ -1,89 +1,56 @@
-import { useEffect, useMemo, useState } from 'react';
+import {useEffect, useMemo, useState} from 'react';
 
-import {
-  NamedStyles,
-  StyleCreator,
-  StyleCreatorWithoutProps,
-  StyleCreatorWithProps,
-  ThemeListener,
-  ThemesType,
-} from './types';
+import {StyleCreator, Styles, Theme, ThemeListener, Themes, ThemeWithoutStyles} from './types';
 
-const _listeners = new Map();
+const $listeners = new Map<symbol, ThemeListener<Themes<any>>>();
 
-let _themes: ThemesType<any>;
+let $themes: Themes<any>;
 
-let _currentTheme: any;
+let $currentTheme: keyof Themes<any>;
 
-export const addListener = <T extends ThemesType<T>>(listener: ThemeListener<T>): (() => boolean) => {
+export const addListener = <T extends Themes<T>>(listener: ThemeListener<T>): (() => boolean) => {
   const key = Symbol();
-  _listeners.set(key, listener);
+  $listeners.set(key, listener);
 
-  return () => _listeners.delete(key);
+  return () => $listeners.delete(key);
 };
 
-export function configureThemes<T extends ThemesType<T>>(themesConfiguration: T, defaultTheme: keyof T) {
-  _themes = themesConfiguration;
-  _currentTheme = defaultTheme;
+export function configureThemes<T extends Themes<T>>(themesConfiguration: T, defaultTheme: keyof T) {
+  $themes = themesConfiguration;
+  $currentTheme = defaultTheme;
 }
 
-export function setTheme<T extends ThemesType<T>>(theme: keyof T): void {
-  if (_currentTheme !== theme) {
-    _currentTheme = theme;
-    _listeners.forEach(listener => {
+export function setTheme<T extends Themes<T>>(theme: keyof T): void {
+  if ($currentTheme !== theme) {
+    $currentTheme = theme;
+    $listeners.forEach(listener => {
       listener(theme);
     });
   }
 }
 
-export function useStyle<T extends ThemesType<T>, S extends NamedStyles<S>>(creator: StyleCreatorWithoutProps<T, S>): S;
-
-export function useStyle<T extends ThemesType<T>, S extends NamedStyles<S>, P>(
-  creator: StyleCreatorWithProps<T, S, P>,
-  props: P,
-): S;
-
-export function useStyle<T extends ThemesType<T>, S extends NamedStyles<S>, P>(
-  creator: StyleCreator<T, S, P>,
-  props?: P,
-): S {
-  const [_theme, _setTheme] = useState<keyof T>(_currentTheme);
-
-  useEffect(() => {
-    const unsubscribe = addListener(value => {
-      _setTheme(value);
-    });
-
-    return () => {
-      unsubscribe();
-    };
-  }, []);
-
-  return useMemo(() => creator(_themes[_theme], props), [creator, _theme, props]);
+export function getTheme<T extends Themes<T>>(): keyof T {
+  return $currentTheme as keyof T;
 }
 
-export function useColors<T extends ThemesType<T>>(): T[keyof T] {
-  const [_theme, _setTheme] = useState<keyof T>(_currentTheme);
-
-  useEffect(() => {
-    const unsubscribe = addListener(value => {
-      _setTheme(value);
-    });
-
-    return () => {
-      unsubscribe();
-    };
-  }, []);
-
-  return useMemo(() => _themes[_theme], [_theme]);
+export function getColors<T extends Themes<T>>(theme?: keyof T): T[keyof T] {
+  return $themes[theme || $currentTheme];
 }
 
-export function useTheme<T extends ThemesType<T>>(): keyof T {
-  const [_theme, _setTheme] = useState<keyof T>(_currentTheme);
+export function useTheme<T extends Themes<T>>(): ThemeWithoutStyles<T>;
+
+export function useTheme<T extends Themes<T>, S extends Styles<S>>(
+    creator: StyleCreator<T, S>
+): Theme<T, S>;
+
+export function useTheme<T extends Themes<T>, S extends Styles<S>>(
+  creator?: StyleCreator<T, S>,
+): Theme<T, S> | ThemeWithoutStyles<T> {
+  const [themeState, setThemeState] = useState<keyof T>($currentTheme as keyof T);
 
   useEffect(() => {
     const unsubscribe = addListener((value: keyof T) => {
-      _setTheme(value);
+      setThemeState(value);
     });
 
     return () => {
@@ -91,13 +58,18 @@ export function useTheme<T extends ThemesType<T>>(): keyof T {
     };
   }, []);
 
-  return useMemo(() => _theme, [_theme]);
-}
+  const styles = useMemo(() => creator ? creator($themes[themeState]) : null, [creator, themeState]);
 
-export function getTheme<T extends ThemesType<T>>(): keyof T {
-  return _currentTheme;
-}
+  if (styles) {
+    return {
+      theme: themeState,
+      colors: $themes[themeState],
+      styles,
+    };
+  }
 
-export function getColors<T extends ThemesType<T>>(theme?: keyof T): T[keyof T] {
-  return _themes[theme || _currentTheme];
+  return {
+    theme: themeState,
+    colors: $themes[themeState],
+  };
 }

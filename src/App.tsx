@@ -1,33 +1,35 @@
-import React, { useState } from 'react';
+import React, {useState} from 'react';
 import { Button, SafeAreaView, StatusBar, StyleSheet, Text } from 'react-native';
-import { configureThemes, useColors, useStyle, useTheme } from '../module';
-import { CreateColorsType, CreateThemesType } from '../module/types';
+import {configureThemes, useTheme} from '../module';
+import {CreateColorsType, CreateThemesType} from '../module/types';
 
 type ThemeKeys = 'light' | 'dark';
-type ColorKeys = 'textColor';
+type ColorKeys = 'textColor' | 'background';
 type Themes = CreateThemesType<ThemeKeys, ColorKeys>;
-type ColorsType = CreateColorsType<ColorKeys>;
+type Colors = CreateColorsType<Themes>;
 
 configureThemes<Themes>(
   {
     light: {
       textColor: 'red',
+      background: '#000',
     },
     dark: {
       textColor: 'green',
+      background: '#000',
     },
   },
   'light',
 );
 
-const styleCreator = (colors: ColorsType) =>
+const styleCreator = (colors: Colors) =>
   StyleSheet.create({
     text: {
       color: colors.textColor,
     },
     background: {
       textAlign: 'auto',
-      color: colors.textColor,
+      color: colors.background,
     },
   });
 
@@ -50,13 +52,10 @@ const App = () => {
 };
 
 const ThemeText = () => {
-  const theme = useTheme<Themes>();
-  const colors = useColors<Themes>();
-  const styles = useStyle(styleCreator);
+  const { styles, colors, theme } = useTheme<Themes, ReturnType<typeof styleCreator>>(styleCreator);
 
   console.log(theme);
   console.log(colors.textColor);
-  console.log(styles.text);
 
   return <Text style={styles.text}>Hello</Text>;
 };
