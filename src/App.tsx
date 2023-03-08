@@ -1,40 +1,40 @@
-import React, {useState} from 'react';
-import { Button, SafeAreaView, StatusBar, StyleSheet, Text } from 'react-native';
-import {configureThemes, useTheme} from '../module';
-import {CreateColorsType, CreateThemesType} from '../module/types';
+import React from 'react';
+import { Button, SafeAreaView, StatusBar, Text } from 'react-native';
+import {createThemes} from '../module';
+import {CreateThemesType} from '../module/types';
 
 type ThemeKeys = 'light' | 'dark';
-type ColorKeys = 'textColor' | 'background';
+type ColorKeys = 'textColor' | 'backgroundColor';
 type Themes = CreateThemesType<ThemeKeys, ColorKeys>;
-type Colors = CreateColorsType<Themes>;
 
-configureThemes<Themes>(
-  {
-    light: {
-      textColor: 'red',
-      background: '#000',
-    },
-    dark: {
-      textColor: 'green',
-      background: '#000',
-    },
+const themes: Themes = {
+  light: {
+    textColor: 'red',
+    backgroundColor: '#000',
   },
+  dark: {
+    textColor: 'green',
+    backgroundColor: '#000',
+  },
+};
+
+const { createStyles, setTheme, useTheme } = createThemes<Themes>(
+  themes,
   'light',
 );
 
-const styleCreator = (colors: Colors) =>
-  StyleSheet.create({
-    text: {
-      color: colors.textColor,
-    },
-    background: {
-      textAlign: 'auto',
-      color: colors.background,
-    },
-  });
+const useStyles = createStyles(({ colors }) => ({
+  text: {
+    color: colors.textColor,
+  },
+  container: {
+    textAlign: 'auto',
+    color: colors.backgroundColor,
+  },
+}));
 
 const App = () => {
-  const [theme, setTheme] = useState('red');
+  const { theme } = useTheme();
 
   return (
     <>
@@ -43,7 +43,7 @@ const App = () => {
       <Button
         title="Toggle theme"
         onPress={() => {
-          setTheme(theme === 'red' ? 'green' : 'red');
+          setTheme(theme === 'light' ? 'dark' : 'light');
         }}
       />
       <ThemeText />
@@ -52,10 +52,11 @@ const App = () => {
 };
 
 const ThemeText = () => {
-  const { styles, colors, theme } = useTheme<Themes, ReturnType<typeof styleCreator>>(styleCreator);
-
+  const { styles, colors, theme } = useStyles();
+  styles.text = {};
   console.log(theme);
   console.log(colors.textColor);
+  console.log(colors.backgroundColor);
 
   return <Text style={styles.text}>Hello</Text>;
 };

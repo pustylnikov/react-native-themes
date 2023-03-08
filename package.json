@@ -1,7 +1,7 @@
 {
   "name": "@anvilapp/react-native-themes",
-  "version": "0.6.0",
-  "description": "React native color themes",
+  "version": "0.7.0",
+  "description": "A lightweight library for managing themes in React Native applications.",
   "main": "dist/index.js",
   "types": "dist/index.d.ts",
   "author": "yura.pustylnikov@gmail.com",
@@ -11,6 +11,13 @@
     "type": "git",
     "url": "https://github.com/pustylnikov/react-native-themes.git"
   },
+  "keywords": [
+    "react-native",
+    "themes",
+    "styling",
+    "hooks",
+    "typescript"
+  ],
   "scripts": {
     "android": "react-native run-android",
     "ios": "react-native run-ios",
