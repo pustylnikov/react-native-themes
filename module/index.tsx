@@ -50,11 +50,13 @@ export function setTheme<T extends Themes<T>>(theme: keyof T): void {
     $setCurrentTheme(theme);
 
     let count = 0;
+    let total = 0;
     let batch: ThemeListener<Themes<T>>[] = [];
     $listeners.forEach((listener) => {
       batch.push(listener);
-      count++;
-      if (count === 10 || count === $listeners.size) {
+      ++count;
+      ++total;
+      if (count === 10 || total === $listeners.size) {
         const $batch = batch;
         setImmediate(() => {
           $batch.forEach(f => f(theme));
