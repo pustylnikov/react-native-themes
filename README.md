@@ -49,16 +49,15 @@ const {
 You can then use these utility functions throughout your application to manage and consume themes.
 For example, you can create styles that depend on the currently active theme using the `createStyles` function:
 ```tsx
-const useStyles = createStyles(({ colors }) =>
-  StyleSheet.create({
-    text: {
-      color: colors.textColor,
-    },
-    background: {
-      textAlign: 'auto',
-      color: colors.backgroundColor,
-    },
-  }));
+const useStyles = createStyles(({ colors }) => ({
+  text: {
+    color: colors.textColor,
+  },
+  background: {
+    textAlign: 'auto',
+    color: colors.backgroundColor,
+  },
+}));
 
 const MyComponent = () => {
   const { styles, colors, theme } = useStyles();
