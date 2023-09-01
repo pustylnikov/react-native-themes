@@ -52,11 +52,12 @@ const App = () => {
 };
 
 const ThemeText = () => {
-  const { styles, colors, theme } = useStyles();
+  const { styles, colors, theme, dimensions } = useStyles();
   styles.text = {};
   console.log(theme);
   console.log(colors.textColor);
   console.log(colors.backgroundColor);
+  console.log(dimensions);
 
   return <Text style={styles.text}>Hello</Text>;
 };

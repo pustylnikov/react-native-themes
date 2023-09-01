@@ -127,6 +127,7 @@ export function useStyles<T extends Themes<T>, S extends Styles<any>>(
     styles,
     theme: themeState,
     colors: getColors<T>(themeState),
+    dimensions,
   };
 }
 
