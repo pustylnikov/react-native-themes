@@ -1,4 +1,4 @@
-import {ImageStyle, TextStyle, ViewStyle} from 'react-native';
+import {ImageStyle, ScaledSize, TextStyle, ViewStyle} from 'react-native';
 
 export type Themes<T> = { [K in keyof T]: Colors<T> };
 
@@ -12,6 +12,7 @@ export type StyleCreatorProps<T> = {
   colors: Readonly<Colors<T>>;
   theme: keyof T;
   select: Selector<T>;
+  dimensions: ScaledSize,
 };
 export type StyleCreator<T extends Themes<any>, S extends Styles<S>> = (props: StyleCreatorProps<T>) => Readonly<S>;
 

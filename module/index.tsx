@@ -7,7 +7,7 @@ import {
   ThemeListener,
   Themes,
 } from './types';
-import {StyleSheet} from 'react-native';
+import {StyleSheet, useWindowDimensions} from 'react-native';
 
 // Map to store all theme listeners
 const $listeners = new Map<symbol, ThemeListener<Themes<any>>>();
@@ -106,6 +106,7 @@ export function useStyles<T extends Themes<T>, S extends Styles<any>>(
   creator: StyleCreator<T, S>,
 ) {
   const [themeState, setThemeState] = useState<keyof T>($currentTheme as keyof T);
+  const dimensions = useWindowDimensions();
 
   useEffect(() => {
     const unsubscribe = registerListener((value: keyof T) => {
@@ -119,8 +120,8 @@ export function useStyles<T extends Themes<T>, S extends Styles<any>>(
 
   // Memoize styles based on themeState
   const styles = useMemo(() => {
-    return StyleSheet.create(creator({ colors: getColors(themeState), theme: themeState, select: $createThemeSelector<T>(themeState) }));
-  }, [creator, themeState]);
+    return StyleSheet.create(creator({ colors: getColors(themeState), theme: themeState, select: $createThemeSelector<T>(themeState), dimensions }));
+  }, [creator, themeState, dimensions]);
 
   return {
     styles,

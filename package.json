@@ -1,6 +1,6 @@
 {
   "name": "@anvilapp/react-native-themes",
-  "version": "0.7.1",
+  "version": "0.8.0",
   "description": "A lightweight library for managing themes in React Native applications.",
   "main": "dist/index.js",
   "types": "dist/index.d.ts",
